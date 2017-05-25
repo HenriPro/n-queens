@@ -100,11 +100,48 @@ window.countNRooksSolutions = function(n) {
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
+  // console.log('n: ', n);
+  // var solutions = [];
+
+  // var findSolutions = function(piecesLeft, boardSoFar) {
+  //   if (piecesLeft === 0) {
+  //     solutions.push(boardSoFar.rows());
+  //     return;
+  //   }
+  //   for (var i = 0; i < n; i++ ) {
+  //     for (var j = 0; j < n; j++) {
+  //       boardSoFar.togglePiece(i, j);
+  //       piecesLeft--;
+  //       if (boardSoFar.hasAnyQueensConflicts()) {
+  //         boardSoFar.togglePiece(i, j);
+  //         piecesLeft++;
+  //       }
+  //       return findSolutions(n, boardSoFar);
+  //     }
+  //   }
+  // }
+  // var board = new Board(n);
+  // findSolutions(n, board);
+
+  // console.log(solutions);
+
+  // return solutions;
+
+
+
+
+
+
+
+
+
+
   var count = 0;
   var solution = [];
   var addPieces = function(x, y) {
     console.log('here')
     var board = new Board({n: n});
+    console.log('board.get(n): ',   board.get('n'));
     board.togglePiece(x, y);
     for (var i = 0; i < n; i++) {
       for (var j = 0; j < n; j++) {
@@ -134,7 +171,6 @@ window.findNQueensSolution = function(n) {
     for (var y = 0; y < n; y++) {
       // solution = addPieces(x, y).rows();
       var setBoard = addPieces(x,y).rows();
-      console.log('board.get(n): ', board.get('n'));
       console.log('setBoard', Array.isArray(setBoard));
       var sum = _.flatten(setBoard).reduce((acc, cur) => acc + cur);
       console.log('sum: ', sum, 'n: ', n);
