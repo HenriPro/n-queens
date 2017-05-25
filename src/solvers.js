@@ -36,13 +36,13 @@ window.findNRooksSolution = function(n) {
     if (!board.hasAnyRooksConflicts() && sum === n) {
       solution.add(board.rows());
     }
-      count++;
-  }
+    count++;
+  };
 
 
   for (var x = 0; x < n; x++) {
     for (var y = 0; y < n; y++) {
-      addPieces(x,y)
+      addPieces(x, y);
     }
   }
 
@@ -55,46 +55,53 @@ window.findNRooksSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
-  var count = 0;
-  var solution = new Set();
+  var solutionCount = 0;
+  var rowBank = [];
+  var sequences = [];
 
-  var addPieces = function(x, y) {
-    var board = new Board({n: n});
-    board.togglePiece(x, y);
+  var populateRowBank = function(n) {
+    var row = [];
+    row.length = n;
+    row.fill(0);
     for (var i = 0; i < n; i++) {
-      for (var j = 0; j < n; j++) {
-        if (board.get(i)[j] < 1) {
-          board.togglePiece(i, j);
-          if (board.hasAnyRooksConflicts()) {
-            board.togglePiece(i, j);
-          }
-        }
+      row[i] = 1;
+      rowBank.push([[].slice.call(row)]);
+      row[i] = 0;
+    }
+  };
+  populateRowBank(n);
+  
+  var fillEmptyBoardSpots = function(incompleteBoard, n) {
+    var boardWithEmpties = [].slice.call(incompleteBoard);
+    var blankArray = [];
+    blankArray.length = n;
+    blankArray.fill(0);
+    while (boardWithEmpties.length < n) {
+      boardWithEmpties.push(blankArray);
+    }
+    return boardWithEmpties;
+  };
+
+  var makeSequences = function (rowsToGo, boardSoFar) {
+    if (rowsToGo === 0) {
+      var testBoard = new Board(boardSoFar);
+      if (!testBoard.hasAnyRooksConflicts()) {
+        solutionCount++;
+      }
+      return;
+    }
+    for (var i = 0; i < rowBank.length; i++) {
+      var currentRow = rowBank[i];
+      var halfFullBoard = fillEmptyBoardSpots(boardSoFar.concat(currentRow), n);
+      var testBoard = new Board(halfFullBoard);
+      if (!testBoard.hasAnyRooksConflicts()) {
+        makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
       }
     }
-    // console.log('increase count truth test: ', !board.hasAnyRooksConflicts());
-    var sum = _(board.rows()).flatten().reduce(((acc, cur) => acc + cur));
-    if (!board.hasAnyRooksConflicts() && sum === n) {
-      // console.log('sum', sum);
-      // console.log('board: ', board.rows())
-      solution.add(JSON.stringify(board.rows()));
-    }
-    // count++;
-  }
-
-
-  for (var x = 0; x < n; x++) {
-    for (var y = 0; y < n; y++) {
-      addPieces(x,y)
-    }
-  }
-
-  // solution = [...solution];
-  // console.log('count: ', count);
-  // console.log(solution);
-
-  var solutionCount = solution.size; //fixme
-
-  // console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
+  };
+  makeSequences(n, []);
+  
+  console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
 };
 
@@ -191,7 +198,7 @@ window.findNQueensSolution = function(n) {
 
 // return the number of nXn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  console.log('n: ', n);
+  var solutionCount = 0;
   var rowBank = [];
   var sequences = [];
 
@@ -207,46 +214,37 @@ window.countNQueensSolutions = function(n) {
   };
   populateRowBank(n);
   
+  var fillEmptyBoardSpots = function(incompleteBoard, n) {
+    var boardWithEmpties = [].slice.call(incompleteBoard);
+    var blankArray = [];
+    blankArray.length = n;
+    blankArray.fill(0);
+    while (boardWithEmpties.length < n) {
+      boardWithEmpties.push(blankArray);
+    }
+    return boardWithEmpties;
+  };
 
   var makeSequences = function (rowsToGo, boardSoFar) {
     if (rowsToGo === 0) {
-      // console.log(JSON.stringify(boardSoFar));
-      // checkifAnyQueensConflicts()
-      sequences.push(boardSoFar);
+      var testBoard = new Board(boardSoFar);
+      if (!testBoard.hasAnyQueensConflicts()) {
+        solutionCount++;
+      }
       return;
     }
     for (var i = 0; i < rowBank.length; i++) {
       var currentRow = rowBank[i];
-      makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
+      var halfFullBoard = fillEmptyBoardSpots(boardSoFar.concat(currentRow), n);
+      var testBoard = new Board(halfFullBoard);
+      if (!testBoard.hasAnyQueensConflicts()) {
+        makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
+      }
     }
   };
   makeSequences(n, []);
   
-  var filteredSequences = sequences.filter(function(board) {
-    // console.log('board: ', JSON.stringify(board));
-    var testBoard = new Board(board);
-    // console.log('testBoard.rows(): ', testBoard.hasAnyQueensConflicts());
-    return !testBoard.hasAnyQueensConflicts();
-  });  // solutionCount = sequences
-  
-  // console.log(filteredSequences, 'filtered');
-
-  console.log('Number of solutions for ' + n + ' queens:', filteredSequences.length);
-  return filteredSequences.length;
+  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+  return solutionCount;
 };
 
-
-
-  
-  // var solutionCount = 0; //fixme
-  
-  // var createBoard = function(row, board) {
-  //   if (row === n) {
-  //     solutionCount++;
-  //     return;
-  //   }
-    
-  //   //for each item in the row 
-    
-    
-  // };
