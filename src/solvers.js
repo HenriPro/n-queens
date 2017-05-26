@@ -53,48 +53,79 @@ window.findNRooksSolution = function(n) {
   return solution;
 };
 
+
+window.hasVerticalConflicts = function(matrix) {
+  var sumOfCols = [].concat(matrix[0]);
+  for (var i = 1; i < matrix.length; i++) {
+    var row = matrix[i];
+    for (var j = 0; j < row.length; j++) {
+      sumOfCols[j] += row[j];
+      if (sumOfCols[j] > 1) {
+        return true;
+      }
+    } 
+  }
+  //console.log(sumOfCols);
+  return false;
+};
+
+window.populateRowBank = function(n, rowBank) {
+  var row = [];
+  row.length = n;
+  row.fill(0);
+  for (var i = 0; i < n; i++) {
+    row[i] = 1;
+    rowBank.push([[].slice.call(row)]);
+    row[i] = 0;
+  }
+};
+
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
+  console.log('n: ');
   var solutionCount = 0;
   var rowBank = [];
   var sequences = [];
 
-  var populateRowBank = function(n) {
-    var row = [];
-    row.length = n;
-    row.fill(0);
-    for (var i = 0; i < n; i++) {
-      row[i] = 1;
-      rowBank.push([[].slice.call(row)]);
-      row[i] = 0;
-    }
-  };
-  populateRowBank(n);
+  window.populateRowBank(n, rowBank);
+  //console.log(rowBank);
   
-  var fillEmptyBoardSpots = function(incompleteBoard, n) {
-    var boardWithEmpties = [].slice.call(incompleteBoard);
-    var blankArray = [];
-    blankArray.length = n;
-    blankArray.fill(0);
-    while (boardWithEmpties.length < n) {
-      boardWithEmpties.push(blankArray);
-    }
-    return boardWithEmpties;
-  };
+  // var fillEmptyBoardSpots = function(incompleteBoard, n) {
+  //   var boardWithEmpties = [].slice.call(incompleteBoard);
+  //   var blankArray = [];
+  //   blankArray.length = n;
+  //   blankArray.fill(0);
+  //   while (boardWithEmpties.length < n) {
+  //     boardWithEmpties.push(blankArray);
+  //   }
+  //   return boardWithEmpties;
+  // };
 
   var makeSequences = function (rowsToGo, boardSoFar) {
     if (rowsToGo === 0) {
-      var testBoard = new Board(boardSoFar);
-      if (!testBoard.hasAnyRooksConflicts()) {
+      // var testBoard = new Board(boardSoFar);
+      if (!window.hasVerticalConflicts(boardSoFar)) {
         solutionCount++;
       }
+      console.log('solution count: ', solutionCount);
       return;
     }
+    
     for (var i = 0; i < rowBank.length; i++) {
       var currentRow = rowBank[i];
-      var halfFullBoard = fillEmptyBoardSpots(boardSoFar.concat(currentRow), n);
-      var testBoard = new Board(halfFullBoard);
-      if (!testBoard.hasAnyRooksConflicts()) {
+      console.log('boardSoFar', JSON.stringify(boardSoFar));
+      console.log('boardSoFar.length', boardSoFar.length);
+      if (boardSoFar.length > 1) {
+        // var halfFullBoard = fillEmptyBoardSpots(boardSoFar.concat(currentRow), n);
+        // var testBoard = new Board(halfFullBoard);
+        console.log('hasVerticalConflicts: ', window.hasVerticalConflicts(boardSoFar.concat(currentRow)));
+        
+        if (!window.hasVerticalConflicts(boardSoFar.concat(currentRow))) {
+          // console.log('has conflict ', window.hasVerticalConflicts(boardSoFar));
+          makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
+        }
+      } else {
+        console.log('here');
         makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
       }
     }
@@ -102,59 +133,13 @@ window.countNRooksSolutions = function(n) {
   makeSequences(n, []);
   
   console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
+    debugger;
+
   return solutionCount;
 };
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  // console.log('n: ', n);
-  // var solution = [];
-
-  // var findSolutions = function(row, boardSoFar) {
-  //   console.log('boardSoFar', boardSoFar);
-  //   var board = new Board(boardSoFar);
-  //   if (piecesLeft === 0) {
-  //     solution.push(board.rows());
-  //     return;
-  //   }
-  //   for (var rowIndex = 0; rowIndex < n; rowIndex++ ) {
-  //     for (var columnIndex = 0; columnIndex < n; columnIndex++) {
-  //       console.log('rowIndex: ', rowIndex, 'columnIndex: ', columnIndex);
-  //       if (board.get(rowIndex)[columnIndex] === 0) {
-  //         board.togglePiece(rowIndex, columnIndex);
-  //         piecesLeft--;
-  //       }
-  //       if (board.hasAnyQueensConflicts()) {
-  //         board.togglePiece(rowIndex, columnIndex);
-  //         piecesLeft++;
-  //       }
-  //       console.log('board here', board.rows());
-  //       return findSolutions(piecesLeft, board.rows());
-  //     }
-  //   }
-  // };
-  // var board = new Board({n: n});
-  // console.log('this board: ', board.rows());
-  // findSolutions(n, board);
-
-  // console.log(JSON.stringify(solution));
-  // // var test = new Board({n: 2});
-  // // console.log('test: ', test.rows())
-  // // console.log('get: ', test.get('n'));
-
-  // return solution;
-
-
-/* Find all combinations of 2 numbers on a 2 x 2 grid*/
-
-
-
-
-
-
-
-
-
 
 
   var solution = [];
@@ -196,55 +181,191 @@ window.findNQueensSolution = function(n) {
   return solution;
 };
 
+
 // return the number of nXn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solutionCount = 0;
-  var rowBank = [];
-  var sequences = [];
-
-  var populateRowBank = function(n) {
-    var row = [];
-    row.length = n;
-    row.fill(0);
-    for (var i = 0; i < n; i++) {
-      row[i] = 1;
-      rowBank.push([[].slice.call(row)]);
-      row[i] = 0;
-    }
-  };
-  populateRowBank(n);
   
-  var fillEmptyBoardSpots = function(incompleteBoard, n) {
-    var boardWithEmpties = [].slice.call(incompleteBoard);
-    var blankArray = [];
-    blankArray.length = n;
-    blankArray.fill(0);
-    while (boardWithEmpties.length < n) {
-      boardWithEmpties.push(blankArray);
-    }
-    return boardWithEmpties;
-  };
 
-  var makeSequences = function (rowsToGo, boardSoFar) {
-    if (rowsToGo === 0) {
-      var testBoard = new Board(boardSoFar);
-      if (!testBoard.hasAnyQueensConflicts()) {
-        solutionCount++;
-      }
-      return;
+  n = 4;
+  var createEmptyGrid = function(n) {
+    var positions = [];
+    for (var x = 0; x < n; x++) {
+      var arr = [];
+      arr.length = n;
+      arr.fill(0);
+      positions.push(arr);
     }
-    for (var i = 0; i < rowBank.length; i++) {
-      var currentRow = rowBank[i];
-      var halfFullBoard = fillEmptyBoardSpots(boardSoFar.concat(currentRow), n);
-      var testBoard = new Board(halfFullBoard);
-      if (!testBoard.hasAnyQueensConflicts()) {
-        makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
-      }
-    }
+    return positions;
   };
-  makeSequences(n, []);
   
-  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
-  return solutionCount;
+  
+  var renderOffLimitsPositions = function(row, col) {
+    var grid = createEmptyGrid(n);
+    
+    
+    //vertical positions
+    for (let y = 0; y < n; y++) {
+      grid[row][y] = 1;
+      
+    }
+    //horizontal postion
+    for (let x = 0; x < n; x++) {
+      grid[x][col] = 1;
+    }
+    
+    //major position up;
+    var x = row - 1;
+    var y = col - 1;
+    while (x >= 0 && y >= 0) {
+      grid[x][y] = 1;
+      x--;
+      y--;
+    }
+    
+    //major position down;
+    x = row + 1;
+    y = col + 1;
+    while (x < n && y < n) {
+      grid[x][y] = 1;
+      x++;
+      y++;
+    }
+    
+    //minor position up;
+    x = row - 1;
+    y = col + 1;
+    while (x >= 0 && y < n) {
+      grid[x][y] = 1;
+      x--;
+      y++;
+    }
+    
+    //minor position down;
+    x = row + 1;
+    y = col - 1;
+    while (x < n && y >= 0) {
+      grid[x][y] = 1;
+      x++;
+      y--;
+    }
+    
+    return grid;
+  };
+  
+  var renderValidPositions = function(grid) {
+    var positions = [];
+    grid.forEach(function(row, i) {
+      row.forEach(function(elem, j) {
+        positions.push(i, j);
+      });
+    });
+    return positions;
+  };
+  
+  var board = new Board({n: n});
+  var validPos = renderValidPositions(grid);
+
+  //for each spot on the board
+  var solutions = {};
+  for (let row = 0; row < n; row++) {
+    for (let col = 0; col < n; col++) {
+      board.togglePiece(row, col);
+      var findSpot = function(spotsLeft, board) {
+        if (spotsLeft === 0) {
+          if (board.hasAnyQueensConflicts()) {
+            solutions[JSON.stringify(board.rows())] = 1;
+          }
+          return;
+        }
+        
+        validPos.forEach(pos => {
+          board.togglePiece(pos[0], pos[1]);
+          if (board.hasAnyQueensConflicts()) {
+            board.togglePiece(pos[0], pos[1]);
+          }
+          findSpot(spotsLeft - 1, board);
+        });
+      };
+    }
+  }
+    //toggle spot
+    //recurse function
+    //for each validPos
+      //toggle spot
+      //if (conflicts)
+        //toggle spot back
+      //invoke recursion(board, spotsLeft)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  // var solutionCount = 0;
+  // var rowBank = [];
+  // var sequences = [];
+
+  // var populateRowBank = function(n) {
+  //   var row = [];
+  //   row.length = n;
+  //   row.fill(0);
+  //   for (var i = 0; i < n; i++) {
+  //     row[i] = 1;
+  //     rowBank.push([[].slice.call(row)]);
+  //     row[i] = 0;
+  //   }
+  // };
+  // populateRowBank(n);
+  
+  // var fillEmptyBoardSpots = function(incompleteBoard, n) {
+  //   var boardWithEmpties = [].slice.call(incompleteBoard);
+  //   var blankArray = [];
+  //   blankArray.length = n;
+  //   blankArray.fill(0);
+  //   while (boardWithEmpties.length < n) {
+  //     boardWithEmpties.push(blankArray);
+  //   }
+  //   return boardWithEmpties;
+  // };
+
+  // var makeSequences = function (rowsToGo, boardSoFar) {
+  //   if (rowsToGo === 0) {
+  //     var testBoard = new Board(boardSoFar);
+  //     if (!testBoard.hasAnyQueensConflicts()) {
+  //       solutionCount++;
+  //     }
+  //     return;
+  //   }
+  //   for (var i = 0; i < rowBank.length; i++) {
+  //     var currentRow = rowBank[i];
+  //     if (boardSoFar.length > 1) {
+  //       var halfFullBoard = fillEmptyBoardSpots(boardSoFar.concat(currentRow), n);
+  //       var testBoard = new Board(halfFullBoard);
+  //       if (!testBoard.hasAnyQueensConflicts()) {
+  //         makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
+  //       }
+  //     } else {
+  //       makeSequences(rowsToGo - 1, boardSoFar.concat(currentRow));
+  //     }
+  //   }
+  // };
+  // makeSequences(n, []);
+  
+  // console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+  // return solutionCount;
 };
 
